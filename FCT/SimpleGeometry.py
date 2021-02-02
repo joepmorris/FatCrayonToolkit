@@ -272,6 +272,7 @@ radiusOneSpherePts=np.asarray([
 radiusOneSphereObj=convexFromPoints(radiusOneSpherePts)
 
 def randSpherePtsFromGaussians(n,rad):
+    np.random.seed(1)
     pts=[]
     for i in range(n):
         u = np.random.normal(0,1)
@@ -508,6 +509,7 @@ def shortestDistanceBetweenLineSegments( xio,xif, xjo,xjf ):
     return distance
 
 def pointCloudToObj(drift_scan, dt, keepFraction=0.01, size=0.2):
+    np.random.seed(1)
     #print 'reading from',scanFile
     #dt=pd.read_csv(scanFile,usecols=[0,1,2],names=['x','y','z'])
     #dt=pd.read_csv(scanFile)
@@ -534,6 +536,7 @@ def pointCloudToObj(drift_scan, dt, keepFraction=0.01, size=0.2):
     return drift_scan
     
 def grepPointCloudToObj(drift_scan, filename, grepString, keepFraction=0.01, size=0.2):
+    np.random.seed(1)
     dt={'x':[],'y':[],'z':[]}
     fd=open(filename,'r')
     for line in fd:

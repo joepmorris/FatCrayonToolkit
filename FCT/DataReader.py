@@ -7,6 +7,26 @@ from scipy import interpolate
 import math as math
 import SimpleGeometry as sg
 import StressCalc as sc
+import random
+
+
+
+def read_laser_pts(pts_file, keepFraction=0.01):
+    np.random.seed(1)
+    # Reads a laser scan PTS file and returns an array of points in a form that looks like a Panda dataframe
+    # dt['x'][], dt['x'][], dt['x'][]
+    dt = {'x':[], 'y':[], 'z':[]}
+    fd = open(pts_file,'r')
+    # Skip the first line, it is only the number of points:
+    line = fd.readline()
+    for line in fd:
+        col = line.split()
+        if random.random()<keepFraction:
+            dt['x'].append(float(col[0]))
+            dt['y'].append(float(col[1]))
+            dt['z'].append(float(col[2]))
+            #print dt; quit()
+    return dt
 
 # Read in a fracture pick file
 class FracPick:
