@@ -1,4 +1,4 @@
-# Fat Crayon Toolkit (FCT) v2020-11-30
+# Fat Crayon Toolkit (FCT)
 
 The Fat Crayon Toolkit (FCT or "Toolkit" for short) was developed to support the design of experimental test beds in the Sanford Underground Research Facility (SURF) for the EGS Collab project (Kneafsey et al., 2020). Functionality includes the ability to prescribe boreholes of various orientations and lengths, along with the locations and orientations of natural and hydraulic fractures. In addition, laser scans of the drift can be imported and the dimensions of the workspaces for drill rigs can be stipulated in order to establish if proposed operations will have sufficient space. The Toolkit can calculate the locations of closes approach among the boreholes, can look for fractures that connect injection and production boreholes, along with the propensity for shear failure on said fractures. The Toolkit can write the resulting 3D model (drift, boreholes, fractures, workspaces) to standard VTL or STL files for visualization in any number of vis tools (e.g.: LLNL's VisIt). The Toolkit is written entirely in Python.
 
