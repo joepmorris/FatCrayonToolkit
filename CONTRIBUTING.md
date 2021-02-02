@@ -1,0 +1,1 @@
+The Fat Crayon Toolkit is an open source project. We welcome contributions via pull requests as well as questions, feature requests, or bug reports via issues. Contact our team at morris50@llnl.gov with any questions. Please also refer to our code of conduct.
