@@ -15,4 +15,8 @@ The Fat Crayon Toolkit was authored by Joseph P. Morris (morris50@llnl.gov)
 The Fat Crayon Toolkit is distributed under the terms of the MIT license.
 All new contributions must be made under the MIT license.
 
+## References
+Kneafsey, T. et al., "Fracture Stimulation and Chilled-water Circulation Though Deep Crystalline Rock:
+ Characterization, Modeling, Monitoring, and Heat-transfer Assessment," PROCEEDINGS, 46th Workshop on Geothermal Reservoir Engineering, Stanford University, Stanford, California, February 15-17, 2021. SGP-TR-218
+
 LLNL-CODE-818890
