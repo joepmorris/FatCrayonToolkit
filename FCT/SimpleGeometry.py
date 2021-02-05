@@ -5,6 +5,7 @@
 import math
 import numpy as np
 from scipy.spatial import ConvexHull
+from scipy.spatial import Delaunay
 from copy import deepcopy
 import sys
 import random
@@ -198,7 +199,10 @@ def simplicesFromPoints(points):
 
 def convexFromPoints(points):
     return ( points, simplicesFromPoints(points) )
-    
+
+def delaunayFromPoints(points):
+    return ( points, Delaunay(points).simplices )
+
 # A non-object
 emptyObject=None
 
@@ -508,7 +512,60 @@ def shortestDistanceBetweenLineSegments( xio,xif, xjo,xjf ):
 
     return distance
 
-def pointCloudToObj(drift_scan, dt, keepFraction=0.01, size=0.2):
+
+# Generate a convex hull from points - Not good in general because drifts are not always convex
+def pointCloudToConvexPolyhedron(drift_scan, dt, keepFraction=0.01):
+    np.random.seed(1)
+    nPoints=len(dt['x'])
+    pts = []
+    for i in range(nPoints):
+        #print "%.1f"%((100.0*i)/nPoints)
+        if (i%100==0):
+            sys.stdout.write("Scan progress %d%%   \r" % ((100.0*i)/nPoints) )
+            sys.stdout.flush()
+        if random.random()<keepFraction:
+            pts.append( [dt['x'][i],dt['y'][i],dt['z'][i]] )
+    drift_scan=mergeObj( drift_scan, convexFromPoints( pts ) )
+    return drift_scan
+
+# Generate a Delaunay triangular mesh from points - Not good on its own because it will not handle concavity
+# However, we can prune the larger triangles to recover a resonable representation of a complex tunnel
+def pointCloudToDelaunay(drift_scan, dt, keepFraction=0.01):
+    np.random.seed(1)
+    nPoints=len(dt['x'])
+    pts = []
+    for i in range(nPoints):
+        #print "%.1f"%((100.0*i)/nPoints)
+        if (i%100==0):
+            sys.stdout.write("Scan progress %d%%   \r" % ((100.0*i)/nPoints) )
+            sys.stdout.flush()
+        if random.random()<keepFraction:
+            pts.append( [dt['x'][i],dt['y'][i],dt['z'][i]] )
+    drift_scan=mergeObj( drift_scan, delaunayFromPoints( pts ) )
+    return drift_scan
+
+# Remove large triangles from an object - we assume we are given a bunch of triangles
+# We drop any triangle with at least one side larger than L
+def pruneLargeTriangles(obj, L):
+    pts, simps_in = obj
+    simps_out = []
+    nTri = len(simps_in)
+    for i in range(nTri):
+        if (i%100==0):
+            sys.stdout.write("Pruning progress %d%%   \r" % ((100.0*i)/nTri) )
+            sys.stdout.flush()
+        tri = simps_in[i]
+        if np.linalg.norm( np.asarray(pts[tri[1]])-np.asarray(pts[tri[0]]) ) > L:
+            continue
+        if np.linalg.norm( np.asarray(pts[tri[2]])-np.asarray(pts[tri[1]]) ) > L:
+            continue
+        if np.linalg.norm( np.asarray(pts[tri[0]])-np.asarray(pts[tri[2]]) ) > L:
+            continue
+        # If we made it this far, the triangle is small enough to keep
+        simps_out.append( tri )
+    return (pts, simps_out)
+
+def pointCloudToCubes(drift_scan, dt, keepFraction=0.01, size=0.2):
     np.random.seed(1)
     #print 'reading from',scanFile
     #dt=pd.read_csv(scanFile,usecols=[0,1,2],names=['x','y','z'])
@@ -535,7 +592,7 @@ def pointCloudToObj(drift_scan, dt, keepFraction=0.01, size=0.2):
     #drift_scan=sg.convexFromPoints(pts) # This turns a list of points into a polyhedron
     return drift_scan
     
-def grepPointCloudToObj(drift_scan, filename, grepString, keepFraction=0.01, size=0.2):
+def grepPointCloudToCubes(drift_scan, filename, grepString, keepFraction=0.01, size=0.2):
     np.random.seed(1)
     dt={'x':[],'y':[],'z':[]}
     fd=open(filename,'r')
