@@ -358,7 +358,6 @@ class ProLayout:
             self.y=dt["BoreType"]
             self.l=np.asarray(dt["Length"],dtype=float)
             self.d=np.asarray(dt["Declination"],dtype=float)
-            self.a=np.asarray(dt["Azimuth"],dtype=float)
         elif (format=='csv'):
             dt=pd.read_csv(surveyFile, skiprows=skiprows)
             #print dt.head()
@@ -370,13 +369,36 @@ class ProLayout:
             self.y=dt["BoreType"]
             self.l=np.asarray(dt["Length_ft"],dtype=float)
             self.d=np.asarray(dt["Declination_deg"],dtype=float)
+            try:
+                self.d_err=np.asarray(dt["Declination_Error"],dtype=float)
+            except:
+                self.d_err=0.0*self.d
             self.a=np.asarray(dt["Azimuth_deg"],dtype=float)
+            try:
+                self.a_err=np.asarray(dt["Azimuth_Error"],dtype=float)
+            except:
+                self.a_err=0.0*self.d
             self.cmt=dt["comment"]
         else:
             print "failed"
             quit()
 
-        
+        # If the Declination or Azimuth errors are non-zero, we will introduce additional error boreholes
+        nBores = len(self.e)
+        for i in range(nBores):
+            if self.d_err[i]>0.0 or self.a_err[i]>0.0:
+                # We have been asked to add in some uncertain orientations
+                for dd,aa in [ [-1.0,0.0], [1.0,0.0], [0.0,-1.0], [0.0,1.0] ]:
+                    self.e=np.append(self.e,self.e[i])
+                    self.n=np.append(self.n,[self.n[i]])
+                    self.u=np.append(self.u,[self.u[i]])
+                    self.y=np.append(self.y,[self.y[i]])
+                    self.l=np.append(self.l,[self.l[i]])
+                    self.d=np.append(self.d,[self.d[i]+dd*self.d_err[i]])
+                    self.d_err=np.append(self.d_err,[self.d_err[i]])
+                    self.a=np.append(self.a,[self.a[i]+aa*self.a_err[i]])
+                    self.a_err=np.append(self.a_err,[self.a_err[i]])
+                    self.cmt=np.append(self.cmt,[self.cmt[i]])
         #Collar
         self.xo = np.transpose(np.asarray([self.e,self.n,self.u]))+self.correction
         
