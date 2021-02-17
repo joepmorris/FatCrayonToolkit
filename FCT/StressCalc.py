@@ -1,5 +1,6 @@
 # Copyright 2018-2021 Lawrence Livermore National Security, LLC and other
 # Fat Crayon Toolkit Project Developers. See the top-level COPYRIGHT file for details.
+from __future__ import print_function
 import numpy as np
 from copy import deepcopy
 import matplotlib.pyplot as plt

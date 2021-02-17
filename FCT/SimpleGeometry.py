@@ -1,5 +1,6 @@
 # Copyright 2018-2021 Lawrence Livermore National Security, LLC and other
 # Fat Crayon Toolkit Project Developers. See the top-level COPYRIGHT file for details.
+from __future__ import print_function
 """ Classes and routines for generating 3D objects
 """
 import math
@@ -587,7 +588,7 @@ def pointCloudToCubes(drift_scan, dt, keepFraction=0.01, size=0.2):
                                    transObj( pntObj, [dt['x'][i],dt['y'][i],dt['z'][i]] )
                                    )
 
-    print 'Scan complete'
+    print('Scan complete')
     #pts=np.asarray(pts)
     #drift_scan=sg.convexFromPoints(pts) # This turns a list of points into a polyhedron
     return drift_scan
@@ -620,7 +621,7 @@ def grepPointCloudToCubes(drift_scan, filename, grepString, keepFraction=0.01, s
             drift_scan=mergeObj(drift_scan,
                                    transObj( pntObj, [dt['x'][i],dt['y'][i],dt['z'][i]] )
                                    )
-    print 'Scan complete'
+    print('Scan complete')
     #pts=np.asarray(pts)
     #drift_scan=sg.convexFromPoints(pts) # This turns a list of points into a polyhedron
     return drift_scan
@@ -631,10 +632,10 @@ def shortestDistanceBetweenLines(a,b, c,d):
     # b=tangent to first line
     # c=origin of second line
     # d=tangent to second line
-    print "a",a
-    print "b",b
-    print "c",c
-    print "d",d
+    #print "a",a
+    #print "b",b
+    #print "c",c
+    #print "d",d
 
     # t=path length along first line
     # s=path length along second line

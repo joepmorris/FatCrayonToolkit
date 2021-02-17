@@ -1,6 +1,11 @@
 # Copyright 2018-2021 Lawrence Livermore National Security, LLC and other
 # Fat Crayon Toolkit Project Developers. See the top-level COPYRIGHT file for details.
+from __future__ import print_function
 import pandas as pd
+import sys;
+import os
+# Using Anaconda it appears necessary to specifically have Anaconda search the directory of the current module in order to find Unit.py
+sys.path.append(os.path.dirname(__file__))
 import Units as unit
 import numpy as np
 from scipy import interpolate
@@ -71,9 +76,9 @@ class FracPick:
         self.dipRad=self.dip_deg*(math.pi/180.0)
 
     def write(self):
-        print "%10s\t%10s\t%10s\t%10s\t%10s"%("i","depth_ft","dip_dir_deg","strike_deg","dip_deg")
+        print("%10s\t%10s\t%10s\t%10s\t%10s"%("i","depth_ft","dip_dir_deg","strike_deg","dip_deg"))
         for i in range(len(self.depth_ft)):
-            print "%10d\t%10g\t%10g\t%10g\t%10g"%(i,self.depth_ft[i],self.dip_dir_deg[i],self.strike_deg[i],self.dip_deg[i])
+            print("%10d\t%10g\t%10g\t%10g\t%10g"%(i,self.depth_ft[i],self.dip_dir_deg[i],self.strike_deg[i],self.dip_deg[i]))
         
     # This does not belong here. We should only be providing helpful functions for reading data
     def appendVis(self, obj, r, h, sigG, Pp):
@@ -94,7 +99,7 @@ class FracPick:
         
 class Survey:
     def __init__(self,surveyFile, name="gyro_filename", correction=[0.0,0.0,0.0], format=0, match="", skiprows=0):
-        print "Reading",surveyFile
+        print("Reading",surveyFile)
         # Sometimes the survey is systematically off
         self.correction=np.array(correction)
         self.name=name
@@ -140,7 +145,7 @@ class Survey:
             dt={"Easting":x, "Northing":y, "TVD":z, "station":md}
             #print dt; quit()
         else:
-            print "failed"
+            print("failed")
             quit()
         #print df.keys()
         #print dt["Easting"]
@@ -203,7 +208,7 @@ class Survey:
 
     def enu_at_md(self,md):
         if md>self.interpMdToI_max:
-            print md,">",self.interpMdToI_max,"in",self.name,"setting to end of survey"
+            print(md,">",self.interpMdToI_max,"in",self.name,"setting to end of survey")
             md=0.999*self.interpMdToI_max
         ii=self.interpMdToI(md)
         i=int(ii)
@@ -219,7 +224,7 @@ class Survey:
     def compare(self, x0,v,survey_index=0):
         # Compare the prescribed line with our own
         fd=open(self.name+"_compare.txt",'w')
-        print "md_feet dist_feet"
+        print("md_feet dist_feet")
         for j in range(self.i0[survey_index],self.i1[survey_index]):
             x=self.x(j)
             dv=x-x0 # Vector to point x from the prescribed collar (x0)
@@ -342,7 +347,7 @@ class DFN_Arrays:
     
 class ProLayout:
     def __init__(self,surveyFile, name="gyro_filename", correction=[0.0,0.0,0.0], format=0, skiprows=0):
-        print "Reading",surveyFile
+        print("Reading",surveyFile)
         # Sometimes the survey is systematically off
         self.correction=np.array(correction)
         self.name=name
@@ -361,7 +366,7 @@ class ProLayout:
         elif (format=='csv'):
             dt=pd.read_csv(surveyFile, skiprows=skiprows)
             #print dt.head()
-            print dt
+            print(dt)
             #print 'read in',dt["comment"]
             self.e=np.asarray(dt["Easting_ft"],dtype=float)
             self.n=np.asarray(dt["Northing_ft"],dtype=float)
@@ -380,7 +385,7 @@ class ProLayout:
                 self.a_err=0.0*self.d
             self.cmt=dt["comment"]
         else:
-            print "failed"
+            print("failed")
             quit()
 
         # If the Declination or Azimuth errors are non-zero, we will introduce additional error boreholes
@@ -429,6 +434,6 @@ class ProLayout:
             elif self.y[j] == 'M':
                 monitoring_obj = sg.mergeObj(monitoring_obj,sg.cylObj(x0=self.xo[j],x1=self.xf[j],r=r))
             else:
-                print 'error: appendVis geometry type unknown'
+                print('error: appendVis geometry type unknown')
             #print 'j = %i' %(j)
         return injection_obj, production_obj, monitoring_obj

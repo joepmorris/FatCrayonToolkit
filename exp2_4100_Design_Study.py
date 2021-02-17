@@ -1,4 +1,5 @@
 #!/usr/local/bin/python
+from __future__ import print_function
 import numpy as np
 import copy as copy
 import math
@@ -190,14 +191,14 @@ else:
 
 # Orientation of the drift in this area
 driftOrientDeg=0.0
-print 'Assuming drift is oriented at azimuth of',driftOrientDeg,'degrees'
+print('Assuming drift is oriented at azimuth of',driftOrientDeg,'degrees')
 # Vector aligned with the drift:
 vDrift=sg.vectFromAzDecDeg(driftOrientDeg,0.0)
 
 # We then get an angle from the injection well
 prodAngRad=2.0*math.asin(0.5*toeDistance/inj['L'])
 prodAngDeg=sg.radToDeg(prodAngRad)
-print 'angle from injector to producers is',prodAngDeg,'degrees to get proximity of',toeDistance,'feet from injector'
+print('angle from injector to producers is',prodAngDeg,'degrees to get proximity of',toeDistance,'feet from injector')
 
 # We then get the plane of the injection well and the drift - we use this as a reference orientation
 # I want a vector lying in the vInj-vDrift plane, perpendicular to vInj, pointing towards drift
@@ -239,7 +240,7 @@ for stn in monStations:
         # We then get an angle from the injection well - perhaps based upon distance between toes?
         monAngRad=2.0*math.asin(0.5*stn['toeDistance']/inj['L'])
         monAngDeg=sg.radToDeg(monAngRad)
-        print 'angle of monitoring wells at station',stn['name'],'to injection well is',monAngDeg,'degrees to get proximity of',stn['toeDistance'],'feet from injector toe'
+        print('angle of monitoring wells at station',stn['name'],'to injection well is',monAngDeg,'degrees to get proximity of',stn['toeDistance'],'feet from injector toe')
         nMon=0
         for clockAz in stn['clockAzs']:
             mon={'L':stn['L'],'x0':stn['x0']}
@@ -273,7 +274,7 @@ for stn in monStations:
         # We need to get the angle to rotate to get the required distance above and below at the target point
         monAngRad=2.0*math.asin(0.5*stn['monDistance']/dist)
         monAngDeg=sg.radToDeg(monAngRad)
-        print 'angle up/down for',stn['name'],'station is',monAngDeg,'degrees to get proximity of',stn['monDistance'],'feet from injector'
+        print('angle up/down for',stn['name'],'station is',monAngDeg,'degrees to get proximity of',stn['monDistance'],'feet from injector')
         # We now rotate this up and down to get the monitoring pair
         # We need to carefully choose what axis to rotate around
         # The axis should not be the injector unless the injector is perpendicular to the monitoring well
@@ -324,7 +325,7 @@ def getFrac(x0,e0,e1):
     v1=np.asarray(e1)-np.asarray(x0)
     n=np.cross(v0,v1)
     n=n/np.linalg.norm(n)
-    print 'n',n
+    print('n',n)
     dipDirection,dipAngle=sg.dipDirectionAndDipAng(n)
     return x0, (dipDirection,dipAngle+90.0)
 
@@ -382,27 +383,27 @@ cwd = os.getcwd()
 # May want to correct the coordinate system being used:
 correction=[0.0,0.0,0.0]
 
-print 'Table of boreholes:'
+print('Table of boreholes:')
 bores = dr.ProLayout(fatCrayonBoreholes,name='Layout',correction=correction,format='csv',skiprows=0)
-print ''
-print 'Summary of boreholes:'
-print 'Length ranges from',np.min(bores.l),'to',np.max(bores.l),'feet'
-print 'Total borehole length',np.sum(bores.l),'feet'
-print 'Declination ranges from',np.min(bores.d),'to',np.max(bores.d),'degrees'
-print ''
+print('')
+print('Summary of boreholes:')
+print('Length ranges from',np.min(bores.l),'to',np.max(bores.l),'feet')
+print('Total borehole length',np.sum(bores.l),'feet')
+print('Declination ranges from',np.min(bores.d),'to',np.max(bores.d),'degrees')
+print('')
 
 # Orientation of the drift
 driftAzDeg=0.0
 alcove_e=3961.68; alcove_n=-2833.7
-print 'N-S Drift azimuth (deg)',driftAzDeg
-print 'south-west corner of alcove   easting',alcove_e,'ft','   northing',alcove_n,'ft'
+print('N-S Drift azimuth (deg)',driftAzDeg)
+print('south-west corner of alcove   easting',alcove_e,'ft','   northing',alcove_n,'ft')
 
-print '%15s%15s%25s%25s'%('name/comment','azimuth(deg)','angle(deg) to drift','dist frm alcove(ft)')
+print('%15s%15s%25s%25s'%('name/comment','azimuth(deg)','angle(deg) to drift','dist frm alcove(ft)'))
 for i in range(len(bores.e)):
     angToDrift=(bores.a[i]-driftAzDeg)
     if angToDrift>90.0:
         angToDrift=180.0-angToDrift
-    print '%15s%12.1f   %20.1f     %20.1f'%(bores.cmt[i],bores.a[i],angToDrift,(np.sqrt( (bores.e[i]-alcove_e)**2 + (bores.n[i]-alcove_n)**2 )))
+    print('%15s%12.1f   %20.1f     %20.1f'%(bores.cmt[i],bores.a[i],angToDrift,(np.sqrt( (bores.e[i]-alcove_e)**2 + (bores.n[i]-alcove_n)**2 ))))
 #quit()
 
 
@@ -450,12 +451,12 @@ injection_obj, production_obj, monitoring_obj = bores.appendVis(injection_obj, p
 # Convert from principal to global
 sigG=sc.sigGfromPrincipal(Sh,SH,SV,ShAzimuthDeg,ShDipDeg)
 
-print "Looping over fracture sets - looking for intersections with boreholes"
+print("Looping over fracture sets - looking for intersections with boreholes")
 for key in sorted(J.keys()): # This will loop through all of the joint sets
     # For each joint set we will create a separate dictionary that we will use to store all natural fracture information
     # In retrospect, this is probably overkill! We can write the VTK files as we go, rather than just save everything
     JS=J[key]
-    print "JS",key
+    print("JS",key)
     JS["nf"]={}
     NF=JS["nf"] # Handy link to the dictionary for the current natural fracture set
     NF["strike_deg"]   =[]
@@ -523,11 +524,11 @@ for key in sorted(deterministicFracs.keys()): # This will loop through all of th
     frcs=deterministicFracs[key]
     # We will add these deterministic sets alongside the other sets in J
     if key in J.keys():
-        print "Somehow we have an deterministic jointset with the same name as one of the stochastic ones"
+        print("Somehow we have an deterministic jointset with the same name as one of the stochastic ones")
         quit()
     J[key]={}
     JS=J[key]
-    print "JS",key
+    print("JS",key)
     JS["nf"]={}
     NF=JS["nf"] # Handy link to the dictionary for the current natural fracture set
     NF["dip_dir_deg"]  =[]
@@ -593,7 +594,7 @@ for key in sorted(deterministicFracs.keys()): # This will loop through all of th
 if True:
     for i in range(len(bores.xo)):
         # We don't want to visualize workspace for TV
-        print "%d '%s'"%(i,bores.cmt[i])
+        print("%d '%s'"%(i,bores.cmt[i]))
         if 'Mon' in bores.cmt[i]:
             L=wspc_mon['L']; W=wspc_mon['W']; H=wspc_mon['H']
         else:
@@ -609,7 +610,7 @@ if True:
         dL = sg.rotatePoints( points=[np.asarray([0.0,1.0,0.0])], axis=np.asarray([0.0,0.0,1.0]), theta=-az_deg*np.pi/180.0 )[0]
         dW = sg.rotatePoints( points=[1.0*dL], axis=np.asarray([0.0,0.0,1.0]), theta=np.pi/2.0 )[0]
         dH = sg.rotatePoints( points=[dW], axis=np.asarray([0.0,1.0,0.0]), theta=-np.pi/2.0 )[0]
-        print 'L',dL; print 'W',dW; print 'H',dH
+        print('L',dL); print('W',dW); print('H',dH)
         x0=np.asarray(exc['loc'])-1.0*dL-3.0*dW
         obj=None
         r=0.25
@@ -634,7 +635,7 @@ if True:
     for i in range(len(bores.xo)):
         for j in range(len(bores.xo)):
             dist=sg.shortestDistanceBetweenLineSegments(bores.xo[i],bores.xf[i], bores.xo[j],bores.xf[j])
-            print "%10s %10s %.1f"%(bores.cmt[i],bores.cmt[j],dist)
+            print("%10s %10s %.1f"%(bores.cmt[i],bores.cmt[j],dist))
 
 
 if True:
@@ -661,12 +662,12 @@ if True:
     sg.writeVtk(objectList, [colorList],["Color"], vtkFile=vtkDir+"/Boreholes.vtk")
 
 if True:
-    print "Looping over fracture sets for visualization"
+    print("Looping over fracture sets for visualization")
     allNFs={"obj":[],"stableMu":[],"criticalDelPp":[],"link":[]}
     for key in sorted(J.keys()): # This will loop through all of the joint sets
         # For each joint set we will create a separate dictionary that we will use to store all natural fracture information
         JS=J[key]
-        print "JS",key
+        print("JS",key)
         NF=JS["nf"] # Handy link to the dictionary for the current natural fracture set
         # Write the natural fractures with their fields
         sg.writeVtk(NF["obj"], [NF["stableMu"],NF["criticalDelPp"],NF["link"]], ["stableMu","criticalDeltaPp","link"], vtkFile=vtkDir+"/NatFracs_%s.vtk"%(key))
@@ -684,4 +685,4 @@ if True:
                           nf_dip_dir_deg, nf_dip_deg,
                           critDelPpFile="Critical_Del_Pp_withFracs.png", stableMuFile='Stable_Mu_Slip_Tendancy_withFracs.png', mohrsFile="Mohrs_Circle_withFracs.png",)
 
-print "Finished"
+print("Finished")
