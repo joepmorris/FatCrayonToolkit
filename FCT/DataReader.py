@@ -305,13 +305,41 @@ class CDFN_Summary:
 
 
 # This will attempt to be smart and read column headings to get what we want
+# fake_xyz is used when we are not given x,y,z in the input file
 class DFN_CSV:
-    def __init__(self,surveyFile,match):
+    def __init__(self,surveyFile,match=None,gyro=None,fake_enu=None):
+        # If the survey does not contain x,y,z we expect to either be given:
+        #   fake_enu = Each fracture will be placed at the sanem point, fake_enu
+        #   gyro = A gyro object that will give us back enu, enu = gyro.enu(md)
+        # We may also be told to convert md from meters to feet
         dt=pd.read_csv(surveyFile)
-        mask = np.asarray([dt["Well_ID"]==match])[0]
-        self.e=np.asarray(dt["x"])[mask]
-        self.n=np.asarray(dt["y"])[mask]
-        self.u=np.asarray(dt["z"])[mask]
+        index = dt.index
+        number_of_rows = len(index)
+        if match==None:
+            mask = np.asarray(range(number_of_rows)) #np.ones(number_of_rows, np.int8)
+        else:
+            mask = np.asarray([dt["Well_ID"]==match])[0]
+        if "x" in dt:
+            self.e=np.asarray(dt["x"])[mask]
+            self.n=np.asarray(dt["y"])[mask]
+            self.u=np.asarray(dt["z"])[mask]
+        elif gyro != None:
+            # We were not given coordinates for the fractures, let's use the gyro
+            if "Depth_m" in dt:
+                self.md = np.asarray(dt["Depth_m"])[mask] * unit.m
+            else:
+                print('Could not find Depth_m');
+                print(dt.keys())
+                quit()
+            self.e = gyro.e(self.md)
+            self.n = gyro.n(self.md)
+            self.u = gyro.u(self.md)
+        else:
+            # We were not given coordinates for the fractures, just place them at the origin
+            self.e=np.asarray([fake_enu[0]]*number_of_rows)
+            self.n=np.asarray([fake_enu[1]]*number_of_rows)
+            self.u=np.asarray([fake_enu[2]]*number_of_rows)
+            #print(number_of_rows,self.e); quit()
         # Azimuth increases in clockwise direction
         # Strike has dip direction on right
         # So a dip direction at 90 degrees (east) would have a strike direction of 0 (north)
@@ -319,6 +347,7 @@ class DFN_CSV:
             # According to Hari: Azimuth in these files is the dip direction. 
             print('As per Hari, assuming azimuth is dip direction')
             self.dip_dir_deg=np.asarray(dt["Azimuth_deg"])[mask]
+            #print(self.dip_dir_deg); quit()
             self.strike_deg=self.dip_dir_deg-90
         else:
             print('Assuming azimuth is dip direction')
@@ -437,3 +466,22 @@ class ProLayout:
                 print('error: appendVis geometry type unknown')
             #print 'j = %i' %(j)
         return injection_obj, production_obj, monitoring_obj
+
+class Gyro:
+    # Read a gyro log and creat interpolants to map from measured depth to east, north, up
+    # Files we are reading are like:
+    # 	Well ID,Depth_ft,Depth_m,x,y,z
+    #E2-AMU,0.0,0.0,3994.2,-2830.2,1127.4
+    #E2-AMU,0.328084,0.1,3994.51926514,-2830.25859612,1127.3522991
+    def __init__(self, gyro_file, md='Depth_ft', east='x', north='y', up='z'):
+        dt = pd.read_csv(gyro_file)
+        self.e = interpolate.interp1d(np.asarray(dt[md]), np.asarray(dt[east]), fill_value = 'extrapolate')
+        self.n = interpolate.interp1d(np.asarray(dt[md]), np.asarray(dt[north]), fill_value = 'extrapolate')
+        self.u = interpolate.interp1d(np.asarray(dt[md]), np.asarray(dt[up]), fill_value = 'extrapolate')
+        #print(dt[md])
+        self.md_limits = np.asarray(dt[md])[[0,-1]]
+        #print(self.md_limits)
+        
+    def enu(self, md):
+        # Return the east, north and up coords, given measured depth (md)
+        return np.asarray([self.e(md),self.n(md),self.u(md)])
